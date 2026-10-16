@@ -4,13 +4,13 @@
 A broker receives a short email about four new drivers. That email alone does not tell them who starts when, which policy schedule applies, or what still needs verification. Coverage Brain prepares that review across four collaborating agents.
 
 **0:25–1:05 · Watcher and Matcher**
-Open the original client message and its later clarification. Select Watcher to show the four hires and distinct start dates. Select Matcher: the issued R2 endorsement replaces R1, already lists two new drivers, and leaves the two future assignments unresolved. Click a citation to show the exact source rather than asking the audience to trust the summary.
+Start in Updates: show the concise briefing and the next action. Open the review update, then the original client message and its later clarification. In Agent activity, open Watcher to show the four hires and distinct start dates, then Matcher: the issued R2 endorsement replaces R1, already lists two new drivers, and leaves the two future assignments unresolved. Click a citation to show the exact source rather than asking the audience to trust the summary.
 
 **1:05–1:45 · Closer and Scribe**
-Select Closer to show two unsent follow-ups: request missing vehicle assignments from the client and applicable issued evidence from the insurer. Select Scribe to show proposed record updates, retained history, and a narrowly scoped learning proposal based on the reviewed correction.
+Open the drafts update to show the two unsent follow-ups: request missing vehicle assignments from the client and applicable issued evidence from the insurer. Open the record proposals update to show Scribe’s proposed changes, retained history, and a narrowly scoped learning proposal based on the reviewed correction.
 
 **1:45–2:15 · Broker control**
-Explain that approval records a review decision. This version does not send email or apply customer-record changes. Unknowns survive every handoff. A blocked or invalid handoff stops downstream execution.
+Show that an update can be marked read or snoozed without approving it. Explain that approval records a review decision. This version does not send email or apply customer-record changes. Unknowns survive every handoff. A blocked or invalid handoff stops downstream execution.
 
 **2:15–2:45 · What actually runs**
 The controller and web application run inside a private Daytona sandbox. Codex makes four distinct model calls, with original evidence and prior packets carried forward. Show the four completed handoffs. A saved run is an actual recorded execution, not a new live run; say which one you are demonstrating.

@@ -1,98 +1,43 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
-  <meta name="theme-color" content="#ffffff">
-  <title>Coverage Brain — AgentForge</title>
-  <link rel="stylesheet" href="/styles.css">
-  <script src="/app.js" defer></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="theme-color" content="#ffffff">
+<title>Coverage Brain — Updates</title><link rel="stylesheet" href="/styles.css"><script src="/app.js" defer></script>
 </head>
 <body>
-  <a class="skip-link" href="#workspace">Skip to review workspace</a>
-  <header class="app-header">
-    <div class="brand">
-      <p class="eyebrow">AgentForge</p>
-      <h1>Coverage Brain<span class="brand-period">.</span></h1>
-    </div>
-    <div class="header-context">
-      <span class="demo-label">Fictional demo workspace</span>
-      <div class="connection"><span id="connection-dot" class="status-dot" aria-hidden="true"></span><span id="connection-label">Connecting to workspace</span></div>
-    </div>
-  </header>
-
-  <main id="workspace" tabindex="-1">
-    <div class="case-heading">
-      <div>
-        <p class="eyebrow">Client review</p>
-        <h2 id="case-title">Loading the selected case</h2>
-        <p class="case-subtitle" id="case-subtitle">One shared case. Four distinct agents. Your final decision.</p>
-      </div>
-      <div class="run-control">
-        <button id="run-button" class="button primary" type="button" disabled>Run four agents <span aria-hidden="true">↗</span></button>
-        <p id="run-hint" class="control-hint">Checking agent availability…</p>
-      </div>
-    </div>
-
-    <div id="error-banner" class="error-banner" role="alert" hidden><span id="error-message"></span><button id="retry-button" class="text-button" type="button">Try again</button></div>
-
-    <section class="workflow" aria-label="Four-agent workflow">
-      <div class="workflow-meta"><span>THE AGENT TEAM</span><span id="workflow-progress">0 of 4 handoffs</span></div>
-      <div id="stage-tabs" class="stage-tabs" role="tablist" aria-label="Agent results">
-        <button class="stage-tab" id="tab-watcher" role="tab" type="button" aria-selected="true" aria-controls="stage-panel" data-stage="watcher" tabindex="0"><span class="stage-index" aria-hidden="true">01</span><span class="stage-copy"><strong>Watcher</strong><span>Notice what changed</span></span><span class="stage-state" data-state="watcher">Ready to start</span></button>
-        <button class="stage-tab" id="tab-matcher" role="tab" type="button" aria-selected="false" aria-controls="stage-panel" data-stage="matcher" tabindex="-1"><span class="stage-index" aria-hidden="true">02</span><span class="stage-copy"><strong>Matcher</strong><span>Compare the evidence</span></span><span class="stage-state" data-state="matcher">Waiting</span></button>
-        <button class="stage-tab" id="tab-closer" role="tab" type="button" aria-selected="false" aria-controls="stage-panel" data-stage="closer" tabindex="-1"><span class="stage-index" aria-hidden="true">03</span><span class="stage-copy"><strong>Closer</strong><span>Draft the follow-up</span></span><span class="stage-state" data-state="closer">Waiting</span></button>
-        <button class="stage-tab" id="tab-scribe" role="tab" type="button" aria-selected="false" aria-controls="stage-panel" data-stage="scribe" tabindex="-1"><span class="stage-index" aria-hidden="true">04</span><span class="stage-copy"><strong>Scribe</strong><span>Prepare the record</span></span><span class="stage-state" data-state="scribe">Waiting</span></button>
-      </div>
-    </section>
-
-    <div class="workspace-grid">
-      <aside class="source-sidebar" aria-labelledby="inbox-title">
-        <div class="section-heading"><h3 id="inbox-title">Case inbox</h3><span class="count">1</span></div>
-        <div class="selected-case"><span class="case-monogram" aria-hidden="true">AP</span><div><strong id="sidebar-client">Selected client</strong><span id="sidebar-case">Fictional sample case</span></div><span class="selected-word">Selected</span></div>
-        <div class="source-list-heading"><h4>Source documents</h4><span id="source-count" class="muted">—</span></div>
-        <label class="sr-only" for="source-search">Search source documents</label>
-        <input id="source-search" class="search-input" type="search" placeholder="Find a source…" autocomplete="off">
-        <div id="source-list" class="source-list"><p class="muted loading-copy">Loading original sources…</p></div>
-        <p class="sidebar-footnote">Original passages stay one click away. Every agent works from this same case.</p>
-        <button id="refresh-button" class="text-button refresh-button" type="button">Refresh workspace status</button>
-      </aside>
-
-      <section class="result-column">
-        <div id="stage-panel" class="stage-panel" role="tabpanel" aria-labelledby="tab-watcher" tabindex="0">
-          <div id="stage-content"></div>
-        </div>
-        <details class="preflight" id="preflight-details">
-          <summary><span><strong>Evidence check</strong><span class="muted">Dates, source scope & citations</span></span><span id="preflight-state">Loading</span></summary>
-          <div id="preflight-content" class="preflight-content"></div>
-        </details>
-      </section>
-
-      <aside class="review-sidebar" aria-labelledby="review-title">
-        <div class="section-heading"><h3 id="review-title">Broker review</h3><span id="review-status" class="small-label">Waiting</span></div>
-        <p class="section-description">The team prepares the work.<br>You make the decision.</p>
-        <div id="draft-content"></div>
-        <div id="proposal-summary"></div>
-        <form id="approval-form" class="approval-form">
-          <label for="approval-note">Review note <span class="muted">(optional)</span></label>
-          <textarea id="approval-note" name="note" rows="3" maxlength="2000" placeholder="Add context for this decision…" disabled></textarea>
-          <button id="approve-button" class="button primary full-width" type="submit" disabled>Approve review packet</button>
-          <button id="reject-button" class="button secondary full-width" type="button" disabled>Reject review packet</button>
-          <p id="approval-feedback" class="approval-feedback" role="status"></p>
-          <p class="approval-boundary">Approval records your review only. Drafts stay unsent and record changes stay unapplied.</p>
-        </form>
-      </aside>
-    </div>
-    <footer class="workspace-footer"><span>Every conversation. One memory.</span><span id="run-reference">No agent run yet</span></footer>
-  </main>
-
-  <dialog id="source-dialog" class="source-dialog" aria-labelledby="source-dialog-title">
-    <div class="dialog-heading"><div><p class="eyebrow">Original evidence</p><h2 id="source-dialog-title">Source document</h2></div><button id="close-source" class="button secondary" type="button">Close <span aria-hidden="true">×</span></button></div>
-    <div id="source-dialog-meta" class="source-dialog-meta"></div>
-    <div id="source-dialog-content" class="source-dialog-content"></div>
-  </dialog>
-  <div id="announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
-  <noscript><p class="noscript">Enable JavaScript to load the case and run the agent team.</p></noscript>
-</body>
-</html>
+<a class="skip-link" href="#main">Skip to updates</a>
+<aside class="sidebar">
+  <a class="brand" href="#updates" aria-label="Coverage Brain home"><span>Coverage<br>Brain<span class="brand-dot">.</span></span><small>BY AGENTFORGE</small></a>
+  <nav class="navigation" aria-label="Workspace"><button type="button" class="nav-item active" data-view="updates" aria-current="page"><span>Updates</span><span id="nav-unread" class="nav-count" hidden>0</span></button><button type="button" class="nav-item" data-view="files">Client files</button><button type="button" class="nav-item" data-view="activity">Agent activity</button></nav>
+  <div class="sidebar-bottom">
+    <div class="monitor-setting"><p class="eyebrow">Keeping an eye on</p><p class="monitor-title"><span id="monitor-dot" class="status-dot" aria-hidden="true"></span><span id="monitor-label">Demo case files</span></p><p id="monitor-time" class="muted small">Connecting…</p><div class="monitor-actions"><button id="pause-monitor" class="text-button" type="button" disabled>Pause</button><button id="check-now" class="text-button" type="button" disabled>Check now</button></div><p id="monitor-error" class="small error-text" hidden></p></div>
+    <p class="sample-note">Fictional workspace<br><span id="sidebar-client">Sample client</span></p>
+  </div>
+</aside>
+<main id="main" tabindex="-1">
+  <div class="topline"><span id="view-label">Your workspace</span><button id="current-work" class="work-status" type="button">Checking workspace</button></div>
+  <div id="error-banner" class="error-banner" role="alert" hidden><p id="error-message"></p><button id="retry-button" class="text-button" type="button">Try again</button></div>
+  <section id="view-updates" class="view" aria-labelledby="updates-title">
+    <div class="briefing"><p class="eyebrow">Your briefing</p><h1 id="updates-title">Here’s what needs<br>your attention.</h1><p id="briefing-copy" class="briefing-copy">I’m checking the recorded work for your selected case.</p><button id="next-action" class="button primary" type="button" hidden>Review the next step <span aria-hidden="true">↗</span></button></div>
+    <div class="feed-toolbar"><h2 id="feed-title">For your attention</h2><div class="filters" role="group" aria-label="Filter updates"><button type="button" data-filter="unread" aria-pressed="true">Unread</button><button type="button" data-filter="all" aria-pressed="false">All</button><button type="button" data-filter="snoozed" aria-pressed="false">Snoozed</button></div></div>
+    <div id="updates-list" class="updates-list"><p class="empty-copy">Loading your updates…</p></div>
+    <p class="feed-footnote">Updates come from demo case files and recorded agent work. No live email is connected.</p>
+  </section>
+  <section id="view-files" class="view" aria-labelledby="files-title" hidden>
+    <div class="page-heading"><p class="eyebrow">Shared context</p><h1 id="files-title">Client files</h1><p class="briefing-copy">The original evidence the four agents share.</p></div>
+    <div class="case-context"><div><h2 id="client-name">Selected client</h2><p id="case-meta" class="muted small"></p></div><span class="sample-badge">Fictional case</span></div>
+    <label class="sr-only" for="source-search">Find a source document</label><input id="source-search" type="search" class="search-input" placeholder="Find a source document…" autocomplete="off">
+    <div id="source-list" class="file-list"></div>
+    <details class="quiet-details"><summary>Evidence check <span>Dates and source scope</span></summary><div id="preflight-content"></div></details>
+  </section>
+  <section id="view-activity" class="view" aria-labelledby="activity-title" hidden>
+    <div class="page-heading"><p class="eyebrow">Behind the updates</p><h1 id="activity-title">Four agents.<br>One shared case.</h1><p class="briefing-copy">Each agent carries the evidence forward. Open a handoff when you want to look closer.</p></div>
+    <div class="activity-control"><div><p id="activity-summary">No agent run loaded.</p><p id="run-hint" class="muted small">Checking model availability…</p></div><button id="run-button" class="button secondary" type="button" disabled>Run a new review</button></div>
+    <div id="activity-list" class="activity-list"></div><p id="run-reference" class="feed-footnote"></p>
+  </section>
+</main>
+<dialog id="detail-dialog" class="detail-dialog" aria-labelledby="detail-title"><header class="dialog-header"><div><p id="detail-eyebrow" class="eyebrow">Your review</p><h2 id="detail-title">Review update</h2></div><button class="button quiet close-dialog" type="button" data-close="detail-dialog">Close <span aria-hidden="true">×</span></button></header><p id="detail-context" class="dialog-context"></p><div id="detail-content"></div><div id="other-handoffs"></div><form id="approval-form" class="approval-form" hidden><div id="stale-notice" class="stale-notice" hidden>New evidence arrived—run a new review before approving this packet.</div><label for="approval-note">Review note <span class="muted">(optional)</span></label><textarea id="approval-note" rows="3" maxlength="2000" placeholder="Anything you want to record with this decision…"></textarea><div class="approval-actions"><button id="approve-button" class="button primary" type="submit">Approve review packet</button><button id="reject-button" class="button secondary" type="button">Reject packet</button></div><p id="approval-feedback" role="status"></p><p class="boundary-note">This records your review only. Drafts stay unsent and record changes stay unapplied.</p></form></dialog>
+<dialog id="source-dialog" class="source-dialog" aria-labelledby="source-title"><header class="dialog-header"><div><p class="eyebrow">Original evidence</p><h2 id="source-title">Source document</h2></div><button class="button quiet close-dialog" type="button" data-close="source-dialog">Close <span aria-hidden="true">×</span></button></header><p id="source-meta" class="dialog-context"></p><div id="source-content"></div></dialog>
+<div id="announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+<noscript><p class="noscript">Enable JavaScript to load updates and review agent work.</p></noscript>
+</body></html>

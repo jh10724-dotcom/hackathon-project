@@ -46,6 +46,32 @@ def fake_packet(stage, prompt, schema):
 
 
 class HTTPTests(unittest.TestCase):
+    def test_updates_http_routes_share_request_protection_and_validate_actions(self):
+        status, feed, _ = self.request("GET", "/api/updates")
+        self.assertEqual(status, 200)
+        self.assertEqual(feed["items"], [])
+        self.assertEqual(feed["monitor"]["source_label"], "Demo case files")
+        for route, body in (("/api/monitor", {"enabled": False}), ("/api/updates/check", {})):
+            self.assertEqual(self.request("POST", route, body, {"X-Broker-Request": ""})[0], 403)
+            self.assertEqual(self.request("POST", route, body, {"Origin": "https://elsewhere.test"})[0], 403)
+        self.assertEqual(self.request("POST", "/api/monitor", {"enabled": "yes"})[0], 400)
+        status, feed, _ = self.request("POST", "/api/monitor", {"enabled": False})
+        self.assertEqual(status, 200)
+        self.assertFalse(feed["monitor"]["enabled"])
+        self.assertEqual(self.request("POST", "/api/updates/check", {"extra": True})[0], 400)
+        self.assertEqual(self.request("POST", "/api/updates/check", {})[0], 200)
+        self.invoke.assert_not_called()
+        job_id = self.start()
+        self.finished(job_id)
+        item_id = self.request("GET", "/api/updates")[1]["items"][0]["id"]
+        route = "/api/updates/" + item_id
+        self.assertEqual(self.request("POST", route, {"action": "delete"})[0], 400)
+        self.assertEqual(self.request("POST", route, {"action": "read"}, {"X-Broker-Request": ""})[0], 403)
+        status, feed, _ = self.request("POST", route, {"action": "read"})
+        self.assertEqual(status, 200)
+        self.assertEqual(next(item for item in feed["items"] if item["id"] == item_id)["status"], "read")
+        self.assertEqual(self.request("POST", "/api/updates/unknown", {"action": "read"})[0], 404)
+
     def test_explicit_public_origin_handles_proxy_host_without_trusting_arbitrary_origins(self):
         self.app.public_origin = "https://broker.example.test"
         path = "/api/runs/00000000-0000-4000-8000-000000000000/approval"

@@ -6,6 +6,7 @@ bind with ``--host 0.0.0.0``. The default bind is loopback on port 8765.
 from __future__ import annotations
 
 import argparse
+import hashlib
 from copy import deepcopy
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -25,6 +26,7 @@ from uuid import UUID, uuid4
 from broker.core import analyze_case
 from broker import model as model_adapter
 from broker.pipeline import PipelineError, STAGES, run_pipeline, _validate_packet
+from broker.updates import UpdateStore
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -82,8 +84,11 @@ class BrokerApplication:
                     or origin.query or origin.fragment or origin.username is not None
                     or origin.password is not None):
                 raise ValueError("BROKER_PUBLIC_ORIGIN must be an exact origin without a path")
-        self.case = json.loads(Path(case_path).read_text(encoding="utf-8"))
+        self.case_path = Path(case_path)
+        initial_bytes = self.case_path.read_bytes()
+        self.case = json.loads(initial_bytes)
         self.preflight = analyze_case(self.case)
+        self._observed_case_hash = hashlib.sha256(initial_bytes).hexdigest()
         self.web_root = Path(web_root).resolve()
         self.runs_dir = Path(runs_dir)
         self.runs_dir.mkdir(parents=True, exist_ok=True)
@@ -96,6 +101,90 @@ class BrokerApplication:
         self._ready_until = 0.0
         self._ready_value = False
         self._recover()
+        self.updates = UpdateStore(self.runs_dir.parent / "updates.json")
+        self._monitor_stop = threading.Event()
+        self._monitor_thread = None
+
+    def updates_response(self) -> dict:
+        with self.lock:
+            return self.updates.feed(self.jobs.values())
+
+    def update_action(self, item_id: str, action: str) -> dict:
+        if not isinstance(action, str) or action not in {"read", "unread", "snooze"}:
+            raise ApiError(400, "Use read, unread, or snooze")
+        with self.lock:
+            self.updates.feed(self.jobs.values())
+            try:
+                self.updates.act(item_id, action)
+            except KeyError:
+                raise ApiError(404, "Update not found") from None
+            return self.updates.feed(self.jobs.values())
+
+    def set_monitor(self, enabled: bool) -> dict:
+        if type(enabled) is not bool:
+            raise ApiError(400, "Enabled must be a boolean")
+        with self.lock:
+            self.updates.monitor["enabled"] = enabled
+            self.updates.save()
+            return self.updates.feed(self.jobs.values())
+
+    def check_updates(self) -> dict:
+        """Inspect the selected case file only. Never invokes any model."""
+        with self.lock:
+            monitor = self.updates.monitor
+            monitor["last_checked_at"] = utc_now()
+            try:
+                raw = self.case_path.read_bytes()
+                digest = hashlib.sha256(raw).hexdigest()
+                if digest != self._observed_case_hash:
+                    candidate = json.loads(raw)
+                    preflight = analyze_case(candidate)
+                    previous_revision = self.preflight["source_revision"]
+                    old = {source["source_id"]: source for source in self.case["sources"]}
+                    new = {source["source_id"]: source for source in candidate["sources"]}
+                    added = sorted(new.keys() - old.keys())
+                    removed = sorted(old.keys() - new.keys())
+                    changed = sorted(key for key in new.keys() & old.keys() if new[key] != old[key])
+                    self.case, self.preflight = candidate, preflight
+                    self._observed_case_hash = digest
+                    monitor["error"] = None
+                    if previous_revision != preflight["source_revision"]:
+                        now = utc_now()
+                        monitor["last_changed_at"] = now
+                        change_id = hashlib.sha256((previous_revision + preflight["source_revision"]).encode()).hexdigest()[:32]
+                        self.updates.upsert({"id": "source-" + change_id, "kind": "source_changed",
+                            "title": "Case sources changed", "summary":
+                            "New case evidence was detected. Review the current sources before the next decision.",
+                            "created_at": now, "run_id": None, "stage": None,
+                            "source_ids": sorted(added + changed + removed), "status": "unread",
+                            "snoozed_until": None, "action_label": "Review case sources"})
+                else:
+                    monitor["error"] = None
+            except (OSError, ValueError, TypeError, KeyError):
+                monitor["error"] = "Case file could not be validated. The last valid evidence is still displayed."
+            self.updates.save()
+            return self.updates.feed(self.jobs.values())
+
+    def start_monitor(self) -> None:
+        """Called only by main(); constructing an application does not start it."""
+        def monitor_loop():
+            while not self._monitor_stop.wait(30):
+                try:
+                    with self.lock:
+                        enabled = self.updates.monitor["enabled"]
+                    if enabled:
+                        self.check_updates()
+                except Exception:
+                    with self.lock:
+                        self.updates.monitor["error"] = "The file monitor could not save its latest check."
+        if self._monitor_thread is None:
+            self._monitor_thread = threading.Thread(target=monitor_loop, daemon=True, name="broker-file-monitor")
+            self._monitor_thread.start()
+
+    def stop_monitor(self) -> None:
+        self._monitor_stop.set()
+        if self._monitor_thread is not None:
+            self._monitor_thread.join(timeout=5)
 
     def _write_atomic(self, job: dict) -> None:
         if not valid_job_id(job["id"]):
@@ -202,7 +291,8 @@ class BrokerApplication:
         return self._ready_value
 
     def case_response(self) -> dict:
-        return {"case": deepcopy(self.case), "preflight": deepcopy(self.preflight)}
+        with self.lock:
+            return {"case": deepcopy(self.case), "preflight": deepcopy(self.preflight)}
 
     def status_response(self) -> dict:
         with self.lock:
@@ -218,18 +308,22 @@ class BrokerApplication:
             return deepcopy(self.jobs[job_id])
 
     def start_run(self) -> str:
+        self.check_updates()
         with self.lock:
             if self.active_run_id is not None:
                 raise ApiError(409, "A review is already running")
             if not self._model_ready_locked():
                 raise ApiError(503, "Codex is not signed in in this runtime")
+            if self.updates.monitor["error"]:
+                raise ApiError(409, "Validate the changed case file before starting a review")
             job_id = str(uuid4())
-            job = {"id": job_id, "status": "running", "current_stage": None, "stages": [],
+            case, preflight = deepcopy(self.case), deepcopy(self.preflight)
+            job = {"id": job_id, "case_id": case["case_id"], "status": "running", "current_stage": None, "stages": [],
                    "result": None, "error": None, "approval": None, "approval_history": [],
                    "created_at": utc_now(), "source_revision": self.preflight["source_revision"], "events": []}
             self._commit_locked(job, "started")
             self.active_run_id = job_id
-            worker = threading.Thread(target=self._run_worker, args=(job_id,), daemon=True,
+            worker = threading.Thread(target=self._run_worker, args=(job_id, case, preflight), daemon=True,
                                       name="broker-review")
             self.worker = worker
             try:
@@ -250,7 +344,7 @@ class BrokerApplication:
             self.jobs[job_id] = job
         self.active_run_id = None
 
-    def _run_worker(self, job_id: str) -> None:
+    def _run_worker(self, job_id: str, case: dict, preflight: dict) -> None:
         def invoke(stage: str, prompt: str, schema: dict) -> dict:
             with self.lock:
                 job = deepcopy(self.jobs[job_id])
@@ -265,7 +359,7 @@ class BrokerApplication:
                 self._commit_locked(job, "stage_completed", stage=stage, status=packet["status"])
 
         try:
-            result = run_pipeline(self.case, self.preflight, invoke, on_stage=on_stage)
+            result = run_pipeline(case, preflight, invoke, on_stage=on_stage)
             with self.lock:
                 job = deepcopy(self.jobs[job_id])
                 job["result"] = result
@@ -288,9 +382,14 @@ class BrokerApplication:
     def approve(self, job_id: str, decision: str, note: str) -> dict:
         if not isinstance(decision, str) or decision not in {"approve", "reject"} or not isinstance(note, str) or len(note) > 4000:
             raise ApiError(400, "Use approve or reject with a note of at most 4000 characters")
+        self.check_updates()
         with self.lock:
             job = self.get_job(job_id)
             result = job.get("result")
+            if self.updates.monitor["error"]:
+                raise ApiError(409, "Validate the changed case file before recording a decision")
+            if job.get("source_revision") != self.preflight["source_revision"]:
+                raise ApiError(409, "The case sources changed. Run a new review before recording a decision.")
             if (job["status"] != "completed" or not isinstance(result, dict)
                     or result.get("status") != "NEEDS_BROKER_REVIEW"
                     or result.get("completed_stages") != list(STAGES)):
@@ -399,6 +498,8 @@ class BrokerHandler(BaseHTTPRequestHandler):
             self._json(200, self.app.case_response())
         elif path == "/api/status":
             self._json(200, self.app.status_response())
+        elif path == "/api/updates":
+            self._json(200, self.app.updates_response())
         elif path.startswith("/api/runs/"):
             self._json(200, self.app.get_job(path[len("/api/runs/"):]))
         elif path.startswith("/api/"):
@@ -424,6 +525,21 @@ class BrokerHandler(BaseHTTPRequestHandler):
             if body:
                 raise ApiError(400, "Run requests must be an empty JSON object")
             self._json(202, {"job_id": self.app.start_run()})
+        elif path == "/api/updates/check":
+            if body:
+                raise ApiError(400, "Check requests must be an empty JSON object")
+            self._json(200, self.app.check_updates())
+        elif path == "/api/monitor":
+            if set(body) != {"enabled"}:
+                raise ApiError(400, "An enabled boolean is required")
+            self._json(200, self.app.set_monitor(body["enabled"]))
+        elif path.startswith("/api/updates/"):
+            item_id = path[len("/api/updates/"):]
+            if not re.fullmatch(r"[a-z0-9_-]{1,100}", item_id):
+                raise ApiError(404, "Update not found")
+            if set(body) != {"action"}:
+                raise ApiError(400, "An update action is required")
+            self._json(200, self.app.update_action(item_id, body["action"]))
         else:
             match = re.fullmatch(r"/api/runs/([^/]+)/approval", path)
             if not match or not valid_job_id(match[1]):
@@ -477,11 +593,13 @@ def main(argv=None) -> int:
         print("Could not start the broker server. Check the case file, audit directory, and listening address.")
         return 1
     print(f"Broker review is available at http://{args.host}:{server.server_port}", flush=True)
+    app.start_monitor()
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
+        app.stop_monitor()
         server.server_close()
     return 0
 

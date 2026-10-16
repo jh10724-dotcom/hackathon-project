@@ -15,6 +15,12 @@ The demo uses fictional clients and documents. It prepares a review packet; it d
 
 The controller validates case/run/source identities, exact quotations, source dates, stage order, and draft/write status before advancing. A blocked stage stops the chain. Unresolved facts remain unresolved through downstream stages. Citation checks establish provenance; a person must still review the interpretation. Conflict propagation is conservative at the source-document level, so a proposal can remain unresolved even when its specific factual field is uncontested.
 
+## A personal-agent workspace
+
+The home screen is an **Updates** briefing: what needs attention, which drafts are ready, and what remains for the broker to decide. Client files and the four-agent activity are separate views; original evidence and full handoffs open only when needed.
+
+The application monitors its configured demo case file every 30 seconds while the server is running. New source changes and completed review results appear in the feed automatically. Read/unread and one-hour snooze choices persist across restarts. Monitoring can be paused, and it does not start paid model runs. See [update behavior and design references](docs/UPDATES.md).
+
 ## Run locally
 
 Requires Python 3.10+ and Node.js supported by the Codex CLI. The Python application has no external dependencies.
@@ -27,7 +33,7 @@ npm install --prefix "$HOME/broker-tools" @openai/codex@0.163.0
 python3 -m broker.server
 ```
 
-Open `http://localhost:8765`. The `preflight` command performs deterministic evidence checks only. Use the dashboard’s **Run four agents** button to invoke the four agents and save the result. For a terminal-only alternative, `python3 -m broker.cli review` prints a result; it does not add a run to the dashboard. No canned agent output is substituted when a model request fails.
+Open `http://localhost:8765`. The `preflight` command performs deterministic evidence checks only. In **Agent activity**, use **Run a new review** to invoke the four agents and save the result. For a terminal-only alternative, `python3 -m broker.cli review` prints a result; it does not add a run to the dashboard. No canned agent output is substituted when a model request fails.
 
 ## Run in Daytona
 
