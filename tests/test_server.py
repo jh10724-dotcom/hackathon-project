@@ -46,6 +46,16 @@ def fake_packet(stage, prompt, schema):
 
 
 class HTTPTests(unittest.TestCase):
+    def test_explicit_public_origin_handles_proxy_host_without_trusting_arbitrary_origins(self):
+        self.app.public_origin = "https://broker.example.test"
+        path = "/api/runs/00000000-0000-4000-8000-000000000000/approval"
+        body = {"decision": "reject", "note": "Transport check only"}
+        status, _, _ = self.request("POST", path, body, {"Origin": self.app.public_origin})
+        self.assertEqual(status, 404)  # Passed origin validation; no such job.
+        status, _, _ = self.request("POST", path, body, {"Origin": "https://untrusted.example.test"})
+        self.assertEqual(status, 403)
+        self.invoke.assert_not_called()
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.root = Path(self.temporary.name)

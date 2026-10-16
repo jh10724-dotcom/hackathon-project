@@ -73,7 +73,15 @@ class BrokerApplication:
     """Shared state and one worker. Tests inject invoke/readiness, never real AI."""
     def __init__(self, *, case_path: Path = ROOT / "data/ap001.json",
                  web_root: Path = ROOT / "web", runs_dir: Path = ROOT / "artifacts/runs",
-                 invoke: Callable | None = None, readiness: Callable[[], bool] | None = None):
+                 invoke: Callable | None = None, readiness: Callable[[], bool] | None = None,
+                 public_origin: str | None = None):
+        self.public_origin = public_origin if public_origin is not None else os.environ.get("BROKER_PUBLIC_ORIGIN", "")
+        if self.public_origin:
+            origin = urlsplit(self.public_origin)
+            if (origin.scheme not in {"http", "https"} or not origin.netloc or origin.path
+                    or origin.query or origin.fragment or origin.username is not None
+                    or origin.password is not None):
+                raise ValueError("BROKER_PUBLIC_ORIGIN must be an exact origin without a path")
         self.case = json.loads(Path(case_path).read_text(encoding="utf-8"))
         self.preflight = analyze_case(self.case)
         self.web_root = Path(web_root).resolve()
@@ -357,7 +365,9 @@ class BrokerHandler(BaseHTTPRequestHandler):
         if origins:
             try:
                 origin = urlsplit(origins[0])
-                matches = (origin.scheme in {"http", "https"} and origin.netloc.lower() == hosts[0].lower()
+                matches = (origin.scheme in {"http", "https"}
+                           and (origin.netloc.lower() == hosts[0].lower()
+                                or origins[0].lower() == self.app.public_origin.lower())
                            and not origin.path and not origin.query and not origin.fragment
                            and origin.username is None and origin.password is None)
             except ValueError:

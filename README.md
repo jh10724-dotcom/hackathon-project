@@ -53,8 +53,13 @@ Then, back on your computer:
 
 ```sh
 python3 scripts/daytona_workspace.py run preflight
-daytona exec broker-agent-demo -- 'cd /home/daytona/broker-agent && BROKER_RUNTIME=daytona nohup python3 -m broker.server --host 0.0.0.0 --port 8765 > /home/daytona/broker-server.log 2>&1 < /dev/null &'
 daytona preview-url broker-agent-demo --port 8765 --expires 3600
+```
+
+Copy the returned origin (without a trailing slash) into `BROKER_PUBLIC_ORIGIN` below. Daytona forwards a different internal Host header; this explicit origin allows your dashboard's review requests while rejecting unrelated sites.
+
+```sh
+daytona exec broker-agent-demo -- 'cd /home/daytona/broker-agent && BROKER_RUNTIME=daytona BROKER_PUBLIC_ORIGIN=https://YOUR-PREVIEW-HOST nohup python3 -m broker.server --host 0.0.0.0 --port 8765 > /home/daytona/broker-server.log 2>&1 < /dev/null &'
 ```
 
 The preview is private and its signed URL expires. Keep that URL out of commits. The sandbox stops after 10 idle minutes; use `daytona start broker-agent-demo` to resume it and restart the server if needed. Stop it explicitly with `daytona stop broker-agent-demo` when finished. Compute, storage, and ChatGPT plan limits still apply.
