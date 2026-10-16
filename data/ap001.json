@@ -1,0 +1,235 @@
+{
+  "schema_version": "broker-case/v1",
+  "fictional": true,
+  "case_id": "DEMO-AP-001",
+  "client_id": "AP-001",
+  "client_name": "Acorn Parcel Demo LLC",
+  "policy_id": "DEMO-CA-AP-2026-01",
+  "review_at": "2026-09-27T12:00:00-04:00",
+  "review_timezone": "America/New_York",
+  "sources": [
+    {
+      "source_id": "AP-PROFILE-001",
+      "client_id": "AP-001",
+      "policy_id": null,
+      "source_type": "broker_intake_record",
+      "recorded_at": "2026-09-24T10:00:00-04:00",
+      "effective_from": null,
+      "effective_to": null,
+      "sections": {
+        "AP-PROFILE-001#identity": "Company: Acorn Parcel Demo LLC. Business: local parcel delivery. Contact: Dana Cole, operations manager. Broker: Alex Stone, Demo Brokerage. Workspace: DEMO-WORKSPACE-01.",
+        "AP-PROFILE-001#policies": "Commercial auto policy: DEMO-CA-AP-2026-01. Carrier label: Fictional Demo Carrier. Associated document: AP-POL-001. Vehicles: AP-V01 and AP-V02.",
+        "AP-PROFILE-001#communication": "Dana prefers a short written summary followed by a call if clarification is needed. No contact address or phone number is supplied. No approval to send a message is recorded.",
+        "AP-PROFILE-001#open-promise": "On 2026-09-24 Alex told Dana: \"I will review any staffing changes against the current driver schedule and tell you what information I still need.\" Status: outstanding; no completion evidence supplied. This is a review commitment, not a promise of coverage."
+      }
+    },
+    {
+      "source_id": "AP-POL-001",
+      "client_id": "AP-001",
+      "policy_id": "DEMO-CA-AP-2026-01",
+      "source_type": "policy_fixture",
+      "recorded_at": "2026-06-25",
+      "effective_from": "2026-07-01T00:00:00-04:00",
+      "effective_to": "2027-06-30T23:59:00-04:00",
+      "sections": {
+        "AP-POL-001#schedule": "Named business: Acorn Parcel Demo LLC. Vehicles: AP-V01 and AP-V02.\nDriver schedule R1: AP-D01 Avery Chen; AP-D02 Sam Rivera; AP-D03 Taylor Reed.\nThe schedule is a supplied list, not a determination of who is covered in a particular event.",
+        "AP-POL-001#driver-review": "For this fictional policy, when the business reports new drivers or changed driving assignments, the broker must verify the driver roster and any applicable endorsement with the carrier before treating the policy record as updated. The review should establish driver identity, assignment start date and assigned vehicle. Where information is missing, request it and mark the policy-review status unresolved.",
+        "AP-POL-001#endorsements": "Only an issued, applicable endorsement changes this fixture's driver schedule. Match policy ID, client ID and effective date. A client message, draft request or broker note alone does not update the schedule. Later applicable schedule revisions supersede R1 for their effective periods; retain earlier versions for history.",
+        "AP-POL-001#limits-of-fixture": "This fixture does not provide premium, limits, exclusions, eligibility rules or a coverage determination. Do not invent them. Do not conclude that an unlisted person is uninsured or that a listed person is covered for every event."
+      }
+    },
+    {
+      "source_id": "AP-MSG-001",
+      "client_id": "AP-001",
+      "policy_id": null,
+      "source_type": "client_message",
+      "recorded_at": "2026-09-26T15:00:00-04:00",
+      "effective_from": null,
+      "effective_to": null,
+      "sections": {
+        "AP-MSG-001#staffing": "Source ID: AP-MSG-001; received 2026-09-26 15:00; author: Dana Cole.\n\n\"We hired four new drivers this week: Riley Brooks, Morgan Ellis, Jordan Park and Casey Lane. Please check whether our policy records need updating.\"\n\nNo driver assignment dates, vehicle assignments or carrier confirmation are supplied in this message. \"Hired\" does not establish that all four currently drive insured vehicles. Source revision at baseline: AP-SOURCE-1."
+      }
+    },
+    {
+      "source_id": "AP-MSG-002",
+      "client_id": "AP-001",
+      "policy_id": null,
+      "source_type": "client_message",
+      "recorded_at": "2026-09-26T16:00:00-04:00",
+      "effective_from": null,
+      "effective_to": null,
+      "sections": {
+        "AP-MSG-002#logo": "Source ID: AP-MSG-002; received 2026-09-26 16:00; author: Dana Cole.\n\n\"We changed our internal newsletter's accent color from green to blue. No company name, address, staffing, vehicles or operations changed because of this.\""
+      }
+    },
+    {
+      "source_id": "AP-MSG-003",
+      "client_id": "AP-001",
+      "policy_id": null,
+      "source_type": "client_clarification",
+      "recorded_at": "2026-09-27T09:00:00-04:00",
+      "effective_from": null,
+      "effective_to": null,
+      "sections": {
+        "AP-MSG-003#assignment-dates": "Source ID: AP-MSG-003; received 2026-09-27 09:00; author: Dana Cole.\n\n\"To clarify yesterday's message: Riley Brooks (AP-D04) and Morgan Ellis (AP-D05) are assigned to drive starting today, September 27. Jordan Park (AP-D06) and Casey Lane (AP-D07) are scheduled to start driving October 5. All four were hired, but they are not all driving today. I have not provided their vehicle assignments yet.\""
+      }
+    },
+    {
+      "source_id": "COR-AP-001",
+      "client_id": "AP-001",
+      "policy_id": null,
+      "source_type": "broker_approved_correction",
+      "recorded_at": "2026-09-27T09:10:00-04:00",
+      "effective_from": null,
+      "effective_to": null,
+      "sections": {
+        "COR-AP-001#approved": "Correction ID: COR-AP-001; approved 2026-09-27 09:10 by fictional broker Alex Stone.\nSupporting sources: AP-MSG-001#staffing; AP-MSG-003#assignment-dates.\nSuperseded interpretation: \"All four newly hired drivers are currently driving.\"\nAccepted interpretation: two reported assignments start 2026-09-27; two are planned for 2026-10-05. Assignment dates are client-reported, not carrier confirmation.\nScope: AP-001, drivers AP-D04 through AP-D07, this staffing event. Reassess if newer relevant evidence changes the dates. Do not apply this split to another client's four-driver hire.\nApproved-memory revision: AP-MEMORY-1. Source revision: AP-SOURCE-2.",
+        "COR-AP-001#still-open": "Vehicle assignments and carrier schedule/endorsement confirmation remain outstanding at this stage. The policy schedule is still R1 until a relevant issued endorsement is supplied. No follow-up has been approved, sent or completed by this record."
+      }
+    },
+    {
+      "source_id": "AP-END-001",
+      "client_id": "AP-001",
+      "policy_id": "DEMO-CA-AP-2026-01",
+      "source_type": "issued_endorsement_fixture",
+      "recorded_at": "2026-09-27T10:00:00-04:00",
+      "effective_from": "2026-09-27T00:00:00-04:00",
+      "effective_to": "2027-06-30T23:59:00-04:00",
+      "sections": {
+        "AP-END-001#roster-r2": "For this fictional policy, driver schedule R2 replaces R1 from the stated effective time. R2 lists:\n- AP-D01 Avery Chen\n- AP-D02 Sam Rivera\n- AP-D03 Taylor Reed\n- AP-D04 Riley Brooks\n- AP-D05 Morgan Ellis\n\nAP-D06 Jordan Park and AP-D07 Casey Lane are not listed in this endorsement. No vehicle assignments are supplied. Other base-policy sections remain unchanged.",
+        "AP-END-001#review-impact": "This document supplies issued schedule evidence for AP-D04 and AP-D05. It does not supply a blanket coverage determination or confirm future assignments for AP-D06/AP-D07. Preserve the client's distinction between September 27 and October 5 assignments.\n\nEffective policy view: AP-POL-001 version 1 plus AP-END-001 version 1. Source revision: AP-SOURCE-3. Approved-memory revision remains AP-MEMORY-1."
+      }
+    }
+  ],
+  "schedule_records": [
+    {
+      "revision": "R1",
+      "drivers": [
+        {
+          "driver_id": "AP-D01",
+          "name": "Avery Chen"
+        },
+        {
+          "driver_id": "AP-D02",
+          "name": "Sam Rivera"
+        },
+        {
+          "driver_id": "AP-D03",
+          "name": "Taylor Reed"
+        }
+      ],
+      "source_ref": {
+        "source_id": "AP-POL-001",
+        "locator": "AP-POL-001#schedule",
+        "quote": "Driver schedule R1: AP-D01 Avery Chen; AP-D02 Sam Rivera; AP-D03 Taylor Reed."
+      }
+    },
+    {
+      "revision": "R2",
+      "drivers": [
+        {
+          "driver_id": "AP-D01",
+          "name": "Avery Chen"
+        },
+        {
+          "driver_id": "AP-D02",
+          "name": "Sam Rivera"
+        },
+        {
+          "driver_id": "AP-D03",
+          "name": "Taylor Reed"
+        },
+        {
+          "driver_id": "AP-D04",
+          "name": "Riley Brooks"
+        },
+        {
+          "driver_id": "AP-D05",
+          "name": "Morgan Ellis"
+        }
+      ],
+      "source_ref": {
+        "source_id": "AP-END-001",
+        "locator": "AP-END-001#roster-r2",
+        "quote": "R2 lists:\n- AP-D01 Avery Chen\n- AP-D02 Sam Rivera\n- AP-D03 Taylor Reed\n- AP-D04 Riley Brooks\n- AP-D05 Morgan Ellis"
+      }
+    }
+  ],
+  "assignment_records": [
+    {
+      "driver_id": "AP-D04",
+      "name": "Riley Brooks",
+      "reported_start_date": "2026-09-27",
+      "source_ref": {
+        "source_id": "AP-MSG-003",
+        "locator": "AP-MSG-003#assignment-dates",
+        "quote": "Riley Brooks (AP-D04) and Morgan Ellis (AP-D05) are assigned to drive starting today, September 27."
+      }
+    },
+    {
+      "driver_id": "AP-D05",
+      "name": "Morgan Ellis",
+      "reported_start_date": "2026-09-27",
+      "source_ref": {
+        "source_id": "AP-MSG-003",
+        "locator": "AP-MSG-003#assignment-dates",
+        "quote": "Riley Brooks (AP-D04) and Morgan Ellis (AP-D05) are assigned to drive starting today, September 27."
+      }
+    },
+    {
+      "driver_id": "AP-D06",
+      "name": "Jordan Park",
+      "reported_start_date": "2026-10-05",
+      "source_ref": {
+        "source_id": "AP-MSG-003",
+        "locator": "AP-MSG-003#assignment-dates",
+        "quote": "Jordan Park (AP-D06) and Casey Lane (AP-D07) are scheduled to start driving October 5."
+      }
+    },
+    {
+      "driver_id": "AP-D07",
+      "name": "Casey Lane",
+      "reported_start_date": "2026-10-05",
+      "source_ref": {
+        "source_id": "AP-MSG-003",
+        "locator": "AP-MSG-003#assignment-dates",
+        "quote": "Jordan Park (AP-D06) and Casey Lane (AP-D07) are scheduled to start driving October 5."
+      }
+    }
+  ],
+  "unknown_records": [
+    {
+      "field": "vehicle_assignments",
+      "source_ref": {
+        "source_id": "AP-END-001",
+        "locator": "AP-END-001#roster-r2",
+        "quote": "No vehicle assignments are supplied."
+      }
+    },
+    {
+      "field": "premium",
+      "source_ref": {
+        "source_id": "AP-POL-001",
+        "locator": "AP-POL-001#limits-of-fixture",
+        "quote": "This fixture does not provide premium, limits, exclusions, eligibility rules or a coverage determination."
+      }
+    },
+    {
+      "field": "limits",
+      "source_ref": {
+        "source_id": "AP-POL-001",
+        "locator": "AP-POL-001#limits-of-fixture",
+        "quote": "This fixture does not provide premium, limits, exclusions, eligibility rules or a coverage determination."
+      }
+    },
+    {
+      "field": "coverage_determination",
+      "source_ref": {
+        "source_id": "AP-POL-001",
+        "locator": "AP-POL-001#limits-of-fixture",
+        "quote": "This fixture does not provide premium, limits, exclusions, eligibility rules or a coverage determination."
+      }
+    }
+  ],
+  "demo_note": "Adapted from the fictional September 2026 AP-001 demonstration. Structured records are explicitly normalized fixture inputs, not model-generated extraction. Review dates select effective policy evidence from all supplied records. The base policy supplies an issue date without an issue time. Every person, policy, message and approval is fictional."
+}

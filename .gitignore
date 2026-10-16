@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+.codex/
+.daytona/
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+artifacts/
+*.log
+node_modules/

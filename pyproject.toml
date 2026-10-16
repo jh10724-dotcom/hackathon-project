@@ -1,0 +1,9 @@
+[project]
+name = "broker-agent"
+version = "0.1.0"
+description = "Evidence-backed broker case review in a Daytona sandbox"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+broker-agent = "broker.cli:main"

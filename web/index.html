@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <title>Coverage Brain — AgentForge</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to review workspace</a>
+  <header class="app-header">
+    <div class="brand">
+      <p class="eyebrow">AgentForge</p>
+      <h1>Coverage Brain<span class="brand-period">.</span></h1>
+    </div>
+    <div class="header-context">
+      <span class="demo-label">Fictional demo workspace</span>
+      <div class="connection"><span id="connection-dot" class="status-dot" aria-hidden="true"></span><span id="connection-label">Connecting to workspace</span></div>
+    </div>
+  </header>
+
+  <main id="workspace" tabindex="-1">
+    <div class="case-heading">
+      <div>
+        <p class="eyebrow">Client review</p>
+        <h2 id="case-title">Loading the selected case</h2>
+        <p class="case-subtitle" id="case-subtitle">One shared case. Four distinct agents. Your final decision.</p>
+      </div>
+      <div class="run-control">
+        <button id="run-button" class="button primary" type="button" disabled>Run four agents <span aria-hidden="true">↗</span></button>
+        <p id="run-hint" class="control-hint">Checking agent availability…</p>
+      </div>
+    </div>
+
+    <div id="error-banner" class="error-banner" role="alert" hidden><span id="error-message"></span><button id="retry-button" class="text-button" type="button">Try again</button></div>
+
+    <section class="workflow" aria-label="Four-agent workflow">
+      <div class="workflow-meta"><span>THE AGENT TEAM</span><span id="workflow-progress">0 of 4 handoffs</span></div>
+      <div id="stage-tabs" class="stage-tabs" role="tablist" aria-label="Agent results">
+        <button class="stage-tab" id="tab-watcher" role="tab" type="button" aria-selected="true" aria-controls="stage-panel" data-stage="watcher" tabindex="0"><span class="stage-index" aria-hidden="true">01</span><span class="stage-copy"><strong>Watcher</strong><span>Notice what changed</span></span><span class="stage-state" data-state="watcher">Ready to start</span></button>
+        <button class="stage-tab" id="tab-matcher" role="tab" type="button" aria-selected="false" aria-controls="stage-panel" data-stage="matcher" tabindex="-1"><span class="stage-index" aria-hidden="true">02</span><span class="stage-copy"><strong>Matcher</strong><span>Compare the evidence</span></span><span class="stage-state" data-state="matcher">Waiting</span></button>
+        <button class="stage-tab" id="tab-closer" role="tab" type="button" aria-selected="false" aria-controls="stage-panel" data-stage="closer" tabindex="-1"><span class="stage-index" aria-hidden="true">03</span><span class="stage-copy"><strong>Closer</strong><span>Draft the follow-up</span></span><span class="stage-state" data-state="closer">Waiting</span></button>
+        <button class="stage-tab" id="tab-scribe" role="tab" type="button" aria-selected="false" aria-controls="stage-panel" data-stage="scribe" tabindex="-1"><span class="stage-index" aria-hidden="true">04</span><span class="stage-copy"><strong>Scribe</strong><span>Prepare the record</span></span><span class="stage-state" data-state="scribe">Waiting</span></button>
+      </div>
+    </section>
+
+    <div class="workspace-grid">
+      <aside class="source-sidebar" aria-labelledby="inbox-title">
+        <div class="section-heading"><h3 id="inbox-title">Case inbox</h3><span class="count">1</span></div>
+        <div class="selected-case"><span class="case-monogram" aria-hidden="true">AP</span><div><strong id="sidebar-client">Selected client</strong><span id="sidebar-case">Fictional sample case</span></div><span class="selected-word">Selected</span></div>
+        <div class="source-list-heading"><h4>Source documents</h4><span id="source-count" class="muted">—</span></div>
+        <label class="sr-only" for="source-search">Search source documents</label>
+        <input id="source-search" class="search-input" type="search" placeholder="Find a source…" autocomplete="off">
+        <div id="source-list" class="source-list"><p class="muted loading-copy">Loading original sources…</p></div>
+        <p class="sidebar-footnote">Original passages stay one click away. Every agent works from this same case.</p>
+        <button id="refresh-button" class="text-button refresh-button" type="button">Refresh workspace status</button>
+      </aside>
+
+      <section class="result-column">
+        <div id="stage-panel" class="stage-panel" role="tabpanel" aria-labelledby="tab-watcher" tabindex="0">
+          <div id="stage-content"></div>
+        </div>
+        <details class="preflight" id="preflight-details">
+          <summary><span><strong>Evidence check</strong><span class="muted">Dates, source scope & citations</span></span><span id="preflight-state">Loading</span></summary>
+          <div id="preflight-content" class="preflight-content"></div>
+        </details>
+      </section>
+
+      <aside class="review-sidebar" aria-labelledby="review-title">
+        <div class="section-heading"><h3 id="review-title">Broker review</h3><span id="review-status" class="small-label">Waiting</span></div>
+        <p class="section-description">The team prepares the work.<br>You make the decision.</p>
+        <div id="draft-content"></div>
+        <div id="proposal-summary"></div>
+        <form id="approval-form" class="approval-form">
+          <label for="approval-note">Review note <span class="muted">(optional)</span></label>
+          <textarea id="approval-note" name="note" rows="3" maxlength="2000" placeholder="Add context for this decision…" disabled></textarea>
+          <button id="approve-button" class="button primary full-width" type="submit" disabled>Approve review packet</button>
+          <button id="reject-button" class="button secondary full-width" type="button" disabled>Reject review packet</button>
+          <p id="approval-feedback" class="approval-feedback" role="status"></p>
+          <p class="approval-boundary">Approval records your review only. Drafts stay unsent and record changes stay unapplied.</p>
+        </form>
+      </aside>
+    </div>
+    <footer class="workspace-footer"><span>Every conversation. One memory.</span><span id="run-reference">No agent run yet</span></footer>
+  </main>
+
+  <dialog id="source-dialog" class="source-dialog" aria-labelledby="source-dialog-title">
+    <div class="dialog-heading"><div><p class="eyebrow">Original evidence</p><h2 id="source-dialog-title">Source document</h2></div><button id="close-source" class="button secondary" type="button">Close <span aria-hidden="true">×</span></button></div>
+    <div id="source-dialog-meta" class="source-dialog-meta"></div>
+    <div id="source-dialog-content" class="source-dialog-content"></div>
+  </dialog>
+  <div id="announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+  <noscript><p class="noscript">Enable JavaScript to load the case and run the agent team.</p></noscript>
+</body>
+</html>
